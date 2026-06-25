@@ -66,7 +66,7 @@ function ensurePlayable(s: LocalState, now: number): void {
   while (!hasValidGroup(s.table) && deckRemaining(s) > 0) {
     s.table.push(s.deck[s.deckPointer++]);
   }
-  if (!hasValidGroup(s.table) && deckRemaining(s) === 0) {
+  if (deckRemaining(s) === 0) {
     s.status = 'over';
     s.finishedAt = now;
     s.winnerId = winnerOf(s);

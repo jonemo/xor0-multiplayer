@@ -77,8 +77,10 @@ describe('full local playthrough', () => {
     }
     expect(g.status).toBe('over');
     expect(g.winnerId).not.toBeNull();
-    const totalCards = g.players.reduce((s, p) => s + p.cardCount, 0);
-    expect(totalCards).toBe(63); // master deck fully cleared
+    // All 63 cards are accounted for: claimed by players + any left on the table
+    // when the deck emptied (the round ends immediately when the deck runs out).
+    const claimed = g.players.reduce((s, p) => s + p.cardCount, 0);
+    expect(claimed + g.table.length).toBe(63);
     expect(winnerOf(g)).toBe(g.winnerId);
   });
 });

@@ -8,8 +8,10 @@ this document replaces them with the single exact rule that defines a valid play
 
 ## 1. Objective
 
-Collect more cards than any other player. When the deck runs out, the player holding
-the **most cards** wins. Ties are broken by the **most dots** collected.
+Collect more cards than any other player. When the deck runs out, the round ends
+immediately and the player holding the **most cards** wins. Ties are broken by the
+**most dots** collected. Any cards still face-up on the table when the deck empties
+are not awarded to anyone.
 
 The entire game reduces to one repeated action: scan the face-up cards, find a subset
 whose dots fully cancel, and claim it before anyone else does.
@@ -175,7 +177,10 @@ width and table size change.
      c. If group is not None and status == ACTIVE:
           announce "XORO!"; collect group; update my_cards, my_dots.
           Replenish table from deck to the starting count.
-     d. If the deck is empty when the last card is drawn, the game ends immediately.
+     d. If the deck is now empty after replenishment, the round ends immediately.
+        Any cards still on the table are NOT awarded — do not attempt to claim them.
+        (By the math of GF(2), those remaining cards always form a valid group, so
+        every player would see it at the same time; ending immediately is fairer.)
 3. Compare card counts. Most cards wins; ties broken by most dots.
 ```
 
