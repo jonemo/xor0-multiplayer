@@ -22,7 +22,7 @@
   border-radius: 8px;
 }
 
-.xcard:not(.xcard--static):hover {
+.xcard:not(.xcard--static):not(.xcard--selected):hover {
   transform: translateY(-4px);
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.22);
 }
