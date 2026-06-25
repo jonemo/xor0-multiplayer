@@ -1,0 +1,28 @@
+node_modules
+dist
+dist-ssr
+*.local
+.env
+.env.local
+.DS_Store
+.vite
+*.tsbuildinfo
+
+# Claude Code local (machine-specific) settings
+.claude/settings.local.json
+
+# Supabase
+supabase/.branches
+supabase/.temp
+supabase/.env
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.playwright-mcp

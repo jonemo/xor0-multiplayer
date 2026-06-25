@@ -1,0 +1,66 @@
+:root {
+  --bg: #fafafa;
+  --ink: #1a1a1a;
+  --teal: #008080;
+  --orange: #aa4400;
+  font-family: 'Helvetica Neue', Arial, system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--bg);
+}
+
+h1,
+h2 {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.wordmark {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* Shared buttons */
+.btn {
+  appearance: none;
+  font: inherit;
+  font-weight: 700;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: transform 80ms ease, background 120ms ease, opacity 120ms ease;
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.btn:not(:disabled):active {
+  transform: translateY(1px);
+}
+.btn--primary {
+  background: var(--teal);
+  color: #fff;
+}
+.btn--primary:not(:disabled):hover {
+  background: #0a6f6f;
+}
+.btn--ghost {
+  background: #fff;
+  border-color: #ddd;
+  color: #333;
+}

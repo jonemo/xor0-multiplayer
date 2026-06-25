@@ -1,0 +1,60 @@
+.xcard {
+  --card-radius: 6%;
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  aspect-ratio: 240 / 360;
+  cursor: pointer;
+  border-radius: 8px;
+  outline: none;
+  transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  display: block;
+}
+
+.xcard__svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 8px;
+}
+
+.xcard:not(.xcard--static):hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.22);
+}
+
+.xcard:focus-visible {
+  box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.6);
+}
+
+.xcard--selected {
+  transform: translateY(-8px);
+  box-shadow: 0 0 0 3px #008080, 0 8px 18px rgba(0, 0, 0, 0.28);
+}
+
+.xcard--dimmed {
+  filter: grayscale(0.5) opacity(0.55);
+}
+
+.xcard--static {
+  cursor: default;
+}
+
+.xcard__pip {
+  fill: #ffffff;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  dominant-baseline: middle;
+}
+
+.xcard__value {
+  fill: #9a9a9a;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+}

@@ -1,0 +1,20 @@
+.xtable {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+/* Keep small tables from stretching cards too wide. */
+.xtable[data-count='4'],
+.xtable[data-count='5'] {
+  max-width: 560px;
+}
+
+@media (max-width: 560px) {
+  .xtable {
+    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(74px, 1fr));
+  }
+}
