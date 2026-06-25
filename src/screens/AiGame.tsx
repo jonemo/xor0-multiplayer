@@ -10,17 +10,26 @@ import './SoloGame.css';
 
 export type BotSkill = 'chill' | 'even' | 'sharp';
 
-/** Base reaction time (ms) per skill — lower is harder to beat. */
-const SKILL_MS: Record<BotSkill, number> = { chill: 2800, even: 1700, sharp: 950 };
+/**
+ * Per-skill bot tuning. `baseMs` is the time to "spot and grab" a set; `miss` is
+ * the chance of not spotting it on a given look (then it looks again). These are
+ * deliberately slow: a bot grabs cards instantly once it decides, while a human
+ * still has to click 3–6 cards, so the bot needs a real handicap to be beatable.
+ */
+const SKILL: Record<BotSkill, { baseMs: number; miss: number }> = {
+  chill: { baseMs: 6500, miss: 0.55 },
+  even: { baseMs: 3800, miss: 0.35 },
+  sharp: { baseMs: 2200, miss: 0.15 },
+};
 const BOT_NAMES = ['Ada', 'Boole', 'Gauss', 'Turing', 'Lovelace'];
 
 export function makeBots(count: number, skill: BotSkill): BotSpec[] {
-  // All bots share the same base reaction; the per-table random jitter in
-  // useLocalGame decides each race, so multiple bots trade wins fairly (rather
-  // than the lowest-indexed bot always firing first).
+  // All bots share the same tuning; the per-look random delay + miss chance in
+  // useLocalGame decides each race, so multiple bots trade wins fairly.
   return Array.from({ length: count }, (_, i) => ({
     name: BOT_NAMES[i % BOT_NAMES.length],
-    reactionMs: SKILL_MS[skill],
+    baseMs: SKILL[skill].baseMs,
+    missChance: SKILL[skill].miss,
   }));
 }
 

@@ -9,7 +9,7 @@ import {
 } from './localGame';
 import { hasValidGroup, isValidGroup } from './xor';
 
-const BOTS = [{ name: 'Bot A', reactionMs: 1000 }];
+const BOTS = [{ name: 'Bot A', baseMs: 1000, missChance: 0 }];
 
 describe('createLocalGame', () => {
   it('seats the human plus the bots and deals a playable table', () => {

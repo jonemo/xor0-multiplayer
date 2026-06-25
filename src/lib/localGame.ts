@@ -23,8 +23,10 @@ export interface LocalPlayer {
   id: string;
   name: string;
   isAI: boolean;
-  /** Bot reaction time in ms (base); ignored for the human. */
-  reactionMs: number;
+  /** Bot: base time (ms) to "spot and grab" a set; ignored for the human. */
+  baseMs: number;
+  /** Bot: chance (0..1) of not spotting a set on a given look (then it looks again). */
+  missChance: number;
   cards: CardValue[];
   cardCount: number;
   dotCount: number;
@@ -45,7 +47,8 @@ export interface LocalState {
 
 export interface BotSpec {
   name: string;
-  reactionMs: number;
+  baseMs: number;
+  missChance: number;
 }
 
 export const HUMAN_ID = 'you';
@@ -77,8 +80,8 @@ export function createLocalGame(
   now: number = Date.now(),
 ): LocalState {
   const players: LocalPlayer[] = [
-    mkPlayer(HUMAN_ID, 'You', false, 0),
-    ...bots.map((b, i) => mkPlayer(`ai${i}`, b.name, true, b.reactionMs)),
+    mkPlayer(HUMAN_ID, 'You', false, 0, 0),
+    ...bots.map((b, i) => mkPlayer(`ai${i}`, b.name, true, b.baseMs, b.missChance)),
   ];
   const state: LocalState = {
     difficulty,
@@ -95,8 +98,14 @@ export function createLocalGame(
   return state;
 }
 
-function mkPlayer(id: string, name: string, isAI: boolean, reactionMs: number): LocalPlayer {
-  return { id, name, isAI, reactionMs, cards: [], cardCount: 0, dotCount: 0, status: 'active' };
+function mkPlayer(
+  id: string,
+  name: string,
+  isAI: boolean,
+  baseMs: number,
+  missChance: number,
+): LocalPlayer {
+  return { id, name, isAI, baseMs, missChance, cards: [], cardCount: 0, dotCount: 0, status: 'active' };
 }
 
 /**

@@ -22,6 +22,9 @@ export function useLocalGame(difficulty: Parameters<typeof createLocalGame>[0], 
   const [now, setNow] = useState(() => Date.now());
   const [lastEvent, setLastEvent] = useState<LocalEvent | null>(null);
   const timers = useRef<number[]>([]);
+  // Always-current state so bot timers read fresh data without re-subscribing.
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   const clearTimers = useCallback(() => {
     timers.current.forEach((id) => window.clearTimeout(id));
@@ -41,27 +44,42 @@ export function useLocalGame(difficulty: Parameters<typeof createLocalGame>[0], 
   }, [state.table]);
 
   // (Re)schedule bot claims whenever the table or anyone's status changes.
+  //
+  // Each bot repeatedly "looks" at the table: after a randomized delay it either
+  // grabs the best set or, with missChance, fails to spot it and looks again.
+  // That gives a human time to find and click a set first — a bot is NOT an
+  // instant optimal player, it just thinks fast.
   const statusSig = state.players.map((p) => p.status).join(',');
   useEffect(() => {
     clearTimers();
     if (state.status !== 'playing') return;
 
-    for (const p of state.players) {
-      if (!p.isAI || p.status !== 'active') continue;
-      if (!botMove(state, p.id)) continue;
-      const delay = p.reactionMs + Math.random() * p.reactionMs * 0.6;
+    const scheduleLook = (botId: string, name: string, baseMs: number, missChance: number) => {
+      const delay = baseMs * (0.6 + Math.random()); // 0.6x – 1.6x
       const id = window.setTimeout(() => {
+        const cur = stateRef.current;
+        const p = cur.players.find((x) => x.id === botId);
+        if (!p || p.status !== 'active' || cur.status !== 'playing') return;
+        if (!botMove(cur, botId)) return; // nothing claimable right now
+        if (Math.random() < missChance) {
+          scheduleLook(botId, name, baseMs, missChance); // didn't spot it — look again
+          return;
+        }
         setState((prev) => {
-          const move = botMove(prev, p.id);
+          const move = botMove(prev, botId);
           if (!move) return prev;
-          const { state: next, result } = claimLocal(prev, p.id, move);
+          const { state: next, result } = claimLocal(prev, botId, move);
           if (result === 'claimed' || result === 'claimed_final') {
-            setLastEvent({ name: p.name, kind: 'claim', cards: move.length });
+            setLastEvent({ name, kind: 'claim', cards: move.length });
           }
           return next;
         });
       }, delay);
       timers.current.push(id);
+    };
+
+    for (const p of state.players) {
+      if (p.isAI && p.status === 'active') scheduleLook(p.id, p.name, p.baseMs, p.missChance);
     }
     return clearTimers;
     // eslint-disable-next-line react-hooks/exhaustive-deps
