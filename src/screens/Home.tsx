@@ -5,18 +5,22 @@ import { createGame, joinGame, quickMatch } from '../lib/api';
 import { formatTime } from '../lib/format';
 import { getBest } from '../lib/leaderboard';
 import { DIFFICULTY, type Difficulty } from '../lib/xor';
+import type { BotSkill } from './AiGame';
 import './Home.css';
 
 const ORDER: Difficulty[] = ['easy', 'medium', 'normal', 'master'];
 
 export interface HomeProps {
   onStartSolo: (difficulty: Difficulty) => void;
+  onStartAi: (difficulty: Difficulty, botCount: number, skill: BotSkill) => void;
   onEnterGame: (gameId: string) => void;
 }
 
-export function Home({ onStartSolo, onEnterGame }: HomeProps) {
+export function Home({ onStartSolo, onStartAi, onEnterGame }: HomeProps) {
   const auth = useAuth();
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
+  const [botCount, setBotCount] = useState(2);
+  const [skill, setSkill] = useState<BotSkill>('even');
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +74,37 @@ export function Home({ onStartSolo, onEnterGame }: HomeProps) {
         </p>
         <button className="btn btn--primary home__start" onClick={() => onStartSolo(difficulty)}>
           Start solo game
+        </button>
+      </section>
+
+      <section className="home__panel">
+        <h2 className="home__h2">Practice · vs AI</h2>
+        <p className="home__soon">Race {botCount} bot{botCount === 1 ? '' : 's'} at the chosen level.</p>
+        <div className="home__airow">
+          <label>
+            Bots{' '}
+            <select value={botCount} onChange={(e) => setBotCount(Number(e.target.value))}>
+              {[1, 2, 3, 4].map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Skill{' '}
+            <select value={skill} onChange={(e) => setSkill(e.target.value as BotSkill)}>
+              <option value="chill">Chill</option>
+              <option value="even">Even</option>
+              <option value="sharp">Sharp</option>
+            </select>
+          </label>
+        </div>
+        <button
+          className="btn btn--primary home__start"
+          onClick={() => onStartAi(difficulty, botCount, skill)}
+        >
+          Play vs AI
         </button>
       </section>
 
