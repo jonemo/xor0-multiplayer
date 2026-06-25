@@ -63,6 +63,10 @@
   }
 }
 
+.mp__main {
+  min-width: 0;
+}
+
 .mp__paused {
   margin-top: 16px;
   text-align: center;
