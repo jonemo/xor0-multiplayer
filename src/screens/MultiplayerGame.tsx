@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Table } from '../components/Table';
 import { useGame } from '../hooks/useGame';
 import { useAuth } from '../auth/AuthProvider';
-import { claimGroup, leaveGame, startGame } from '../lib/api';
+import { claimGroup, leaveGame, restartGame, startGame } from '../lib/api';
 import { isValidGroup, popcount, type CardValue } from '../lib/xor';
 import type { GamePlayerRow } from '../lib/database.types';
 import './MultiplayerGame.css';
@@ -78,6 +78,17 @@ export function MultiplayerGame({ gameId, onExit }: MultiplayerGameProps) {
     }
   };
 
+  const doRestart = async () => {
+    setBusy(true);
+    try {
+      await restartGame(gameId);
+    } catch (e) {
+      setToast(e instanceof Error ? e.message : 'Could not restart');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const doLeave = async () => {
     try {
       await leaveGame(gameId);
@@ -125,7 +136,15 @@ export function MultiplayerGame({ gameId, onExit }: MultiplayerGameProps) {
           )}
 
           {game.status === 'finished' && (
-            <Results players={players} winnerId={game.winner_id} meId={me?.id} onExit={onExit} />
+            <Results
+              players={players}
+              winnerId={game.winner_id}
+              meId={me?.id}
+              isHost={isHost}
+              busy={busy}
+              onRestart={doRestart}
+              onExit={onExit}
+            />
           )}
         </section>
       </div>
@@ -232,11 +251,17 @@ function Results({
   players,
   winnerId,
   meId,
+  isHost,
+  busy,
+  onRestart,
   onExit,
 }: {
   players: GamePlayerRow[];
   winnerId: string | null;
   meId?: string;
+  isHost: boolean;
+  busy: boolean;
+  onRestart: () => void;
   onExit: () => void;
 }) {
   const ranked = [...players].sort(
@@ -257,7 +282,14 @@ function Results({
           </li>
         ))}
       </ol>
-      <button className="btn btn--primary" onClick={onExit}>
+      {isHost ? (
+        <button className="btn btn--primary" disabled={busy} onClick={onRestart}>
+          Play again
+        </button>
+      ) : (
+        <p className="lobby__hint">Waiting for host to start next round…</p>
+      )}
+      <button className="btn btn--ghost" onClick={onExit}>
         Back to menu
       </button>
     </div>

@@ -40,6 +40,13 @@ export async function startGame(gameId: string): Promise<GameRow> {
   return data as GameRow;
 }
 
+export async function restartGame(gameId: string): Promise<GameRow> {
+  const sb = requireSupabase();
+  const { data, error } = await sb.rpc('restart_game', { p_game_id: gameId });
+  if (error) throw new Error(error.message);
+  return data as GameRow;
+}
+
 export async function leaveGame(gameId: string): Promise<void> {
   const sb = requireSupabase();
   const { error } = await sb.rpc('leave_game', { p_game_id: gameId });
