@@ -1,7 +1,7 @@
 # TODO
 
 Status: Phases 0–4 complete and **deployed** at https://play.xor0game.com/.
-Solo timed, solo-vs-AI, room-code multiplayer, and quick-match all work and are
+Solo timed, room-code multiplayer, and quick-match all work and are
 verified (including a real two-human multiplayer test). What's left:
 
 ## Phase 5 — polish (the main remaining work)
@@ -29,11 +29,6 @@ verified (including a real two-human multiplayer test). What's left:
       rename (write to `profiles`, which already allows owner updates).
 - [ ] **Multiplayer niceties:** rematch button, start countdown, handle a player
       leaving mid-game, reconnect/resume, "ready" states in the lobby.
-- [ ] **AI bot calibration.** Re-tune `SKILL` in `src/screens/AiGame.tsx` after real
-      play. Possibly add an even-gentler tier, or an in-game difficulty slider.
-- [ ] **Public quick-match with bots.** To avoid empty public rooms, fill them with
-      server-side AI (a Supabase Edge Function reacting to table changes). The
-      client AI can't do this (no `auth.uid()` for bots).
 
 ## Tech debt / infra
 
@@ -48,7 +43,7 @@ verified (including a real two-human multiplayer test). What's left:
 - [ ] **Security review** before any real traffic (`/security-review` on the diff).
       Re-check RLS read policies and that no RPC leaks deck order beyond the table.
 - [ ] **Bundle size.** ~110 KB gzip, mostly supabase-js. Fine for now; revisit if it
-      grows. Solo/AI don't need supabase-js — could lazy-load it for online modes.
+      grows. Solo doesn't need supabase-js — could lazy-load it for online modes.
 
 ## Known caveats (context, not necessarily action items)
 
@@ -63,4 +58,4 @@ verified (including a real two-human multiplayer test). What's left:
 
 Read `CLAUDE.md`. Key rule: the game engine lives in BOTH `src/lib/xor.ts` and the
 SQL migrations (`app.*` + `claim_group`) — keep them in sync. Multiplayer state is
-Postgres-authoritative via RPCs; solo and AI are client-side only.
+Postgres-authoritative via RPCs; solo is client-side only.

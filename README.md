@@ -15,7 +15,6 @@ zero. Most cards wins, ties broken by most dots.
 
 - **Solo · against the clock** — clear the deck as fast as you can (fully client-side)
 - **Multiplayer** — private room codes + public quick-match, real-time races
-- _(planned)_ solo vs AI opponents
 
 ## Develop
 
@@ -35,7 +34,7 @@ sign-ins** under Authentication → Sign In / Providers.
 
 The game engine is mirrored in two places that must stay in sync:
 
-- `src/lib/xor.ts` — TypeScript engine (UI, AI, solo mode)
+- `src/lib/xor.ts` — TypeScript engine (UI, solo mode)
 - `supabase/migrations/0001_*.sql` + `0003_*.sql` — the authoritative SQL engine (`app.*`
   helpers and the `claim_group` RPC)
 

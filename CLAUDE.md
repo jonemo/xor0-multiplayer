@@ -40,15 +40,14 @@ npm run build       # tsc + vite build -> dist/
    / `claimed_final`. A valid claim un-pauses everyone (spec §7).
 
 3. **The game engine is mirrored in TWO places that MUST stay in sync:**
-   - `src/lib/xor.ts` — the TypeScript engine (UI, solo, AI).
+   - `src/lib/xor.ts` — the TypeScript engine (UI, solo).
    - `supabase/migrations/0001_*.sql` (`app.*` helpers) + `0003_*.sql` (`claim_group`)
      — the authoritative SQL engine.
    If you change game logic, change both. The SQL `app.has_group` uses GF(2) rank
    (a zero-XOR subset exists iff the card vectors are linearly dependent).
 
-4. **Solo + solo-vs-AI are fully client-side** (no Supabase). AI bots run **in the
-   browser only** — they can't drive real Supabase games because `claim_group`
-   needs `auth.uid()`. See `src/lib/localGame.ts` + `src/hooks/useLocalGame.ts`.
+4. **Solo is fully client-side** (no Supabase). See `src/lib/solo.ts` +
+   `src/hooks/useSoloGame.ts`.
 
 5. **Realtime** = Postgres Changes on `games` / `game_players` / `claims`
    (`src/hooks/useGame.ts`). Authority is the RPC return value; realtime is for
@@ -62,14 +61,13 @@ src/lib/
                   #   DIFFICULTY configs, shuffle  (mirrored in SQL — keep in sync)
   cards.ts        # bit -> {position, color, hex} for procedural card rendering
   solo.ts         # pure solo timed-game state
-  localGame.ts    # pure human-vs-AI (offline) game state
   api.ts          # typed wrappers around the Supabase RPCs + reads
   supabase.ts     # client (degrades gracefully if env not set)
   database.types.ts  # generated; regenerate via Supabase MCP generate_typescript_types
   leaderboard.ts  # solo best times (localStorage; Supabase TODO)
 src/components/   # Card (procedural SVG), Table
-src/screens/      # Home, SoloGame, AiGame, MultiplayerGame
-src/hooks/        # useSoloGame, useLocalGame (bot timers), useGame (realtime)
+src/screens/      # Home, SoloGame, MultiplayerGame
+src/hooks/        # useSoloGame, useGame (realtime)
 src/auth/         # AuthProvider (anonymous sign-in + optional email link)
 supabase/migrations/   # 0001 profiles+helpers, 0002 tables+RLS+realtime, 0003 RPCs,
                        #   0004 hardening, 0005 gen_code fix
@@ -115,9 +113,6 @@ physical cards. `autosvg/NN.svg` = card value NN (reference art).
 
 ## Gotchas
 
-- **AI bot tuning** lives in `SKILL` in `src/screens/AiGame.tsx`. Bots grab a set
-  instantly once they decide, while a human must click 3–6 cards, so timings are
-  deliberately slow (`baseMs` + `missChance`). Don't make them "instant optimal."
 - **Playwright + Vite:** Playwright writes snapshots/screenshots into the repo,
   which Vite's watcher treats as source changes → full page reload (resets React
   state mid-test). `vite.config.ts` ignores `.playwright-mcp/**` and `*.png`; save
