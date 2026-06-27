@@ -15,7 +15,7 @@ export interface MultiplayerGameProps {
 
 export function MultiplayerGame({ gameId, onExit }: MultiplayerGameProps) {
   const { user } = useAuth();
-  const { game, players, latestClaim, loading } = useGame(gameId);
+  const { game, players, latestClaim, loading, intermission } = useGame(gameId);
   const [selected, setSelected] = useState<CardValue[]>([]);
   const [toast, setToast] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -27,16 +27,13 @@ export function MultiplayerGame({ gameId, onExit }: MultiplayerGameProps) {
   const isHost = game?.host_id === user?.id;
   const paused = me?.status === 'paused';
 
-  // Surface claim events as a brief toast.
+  // Surface penalty/too-slow claim events as a brief toast. Successful claims
+  // get the full intermission UI instead, so they're skipped here.
   useEffect(() => {
     if (!latestClaim) return;
+    if (latestClaim.outcome === 'claimed' || latestClaim.outcome === 'claimed_final') return;
     const who = players.find((p) => p.id === latestClaim.player_id)?.display_name ?? 'Someone';
-    const msg =
-      latestClaim.outcome === 'penalty'
-        ? `${who} mis-claimed — paused`
-        : latestClaim.outcome === 'too_slow'
-          ? `${who} was too slow`
-          : `${who} took ${latestClaim.card_values.length} cards`;
+    const msg = latestClaim.outcome === 'penalty' ? `${who} mis-claimed — paused` : `${who} was too slow`;
     setToast(msg);
     const id = window.setTimeout(() => setToast(null), 2200);
     return () => window.clearTimeout(id);
@@ -46,6 +43,15 @@ export function MultiplayerGame({ gameId, onExit }: MultiplayerGameProps) {
   useEffect(() => {
     setSelected((sel) => sel.filter((v) => game?.table_cards.includes(v)));
   }, [game?.table_cards]);
+
+  // Drop the selection as soon as an intermission begins (the table freezes).
+  useEffect(() => {
+    if (intermission) setSelected([]);
+  }, [intermission]);
+
+  const claimerName = intermission
+    ? (players.find((p) => p.id === intermission.claimedPlayerId)?.display_name ?? 'Someone')
+    : null;
 
   if (loading || !game) {
     return <main className="mp mp--center">Loading game…</main>;
@@ -124,12 +130,19 @@ export function MultiplayerGame({ gameId, onExit }: MultiplayerGameProps) {
 
           {game.status === 'active' && (
             <>
+              {intermission && (
+                <div className="mp__intermission">
+                  {claimerName} got {intermission.claimedCards.length} card
+                  {intermission.claimedCards.length === 1 ? '' : 's'}!
+                </div>
+              )}
               <Table
-                table={game.table_cards}
-                selected={selected}
-                onToggle={paused ? undefined : toggle}
+                table={intermission ? intermission.displayTable : game.table_cards}
+                selected={intermission ? [] : selected}
+                claimed={intermission?.claimedCards}
+                onToggle={intermission || paused ? undefined : toggle}
               />
-              {paused && (
+              {paused && !intermission && (
                 <div className="mp__paused">Paused — wait for the next valid XORO to rejoin.</div>
               )}
             </>

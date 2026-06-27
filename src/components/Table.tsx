@@ -7,11 +7,13 @@ export interface TableProps {
   table: readonly CardValue[];
   selected?: readonly CardValue[];
   hinted?: readonly CardValue[];
+  /** Cards highlighted as a just-claimed set during the intermission. */
+  claimed?: readonly CardValue[];
   onToggle?: (v: CardValue) => void;
   showValues?: boolean;
 }
 
-export function Table({ table, selected = [], hinted = [], onToggle, showValues }: TableProps) {
+export function Table({ table, selected = [], hinted = [], claimed = [], onToggle, showValues }: TableProps) {
   const hintSet = new Set(hinted);
   const dimming = hintSet.size > 0;
   return (
@@ -22,6 +24,7 @@ export function Table({ table, selected = [], hinted = [], onToggle, showValues 
           value={v}
           showValue={showValues}
           selected={selected.includes(v)}
+          claimed={claimed.includes(v)}
           dimmed={dimming && !hintSet.has(v)}
           onClick={onToggle}
         />

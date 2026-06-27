@@ -17,6 +17,8 @@ const DOT_R = 34;
 export interface CardProps {
   value: CardValue;
   selected?: boolean;
+  /** Highlight as part of a set just claimed by someone (intermission). */
+  claimed?: boolean;
   /** Visually de-emphasize (e.g. not part of a hovered group). */
   dimmed?: boolean;
   onClick?: (value: CardValue) => void;
@@ -25,7 +27,7 @@ export interface CardProps {
   className?: string;
 }
 
-export function Card({ value, selected, dimmed, onClick, showValue, className }: CardProps) {
+export function Card({ value, selected, claimed, dimmed, onClick, showValue, className }: CardProps) {
   const interactive = !!onClick;
   const dots = dotsForCard(value);
 
@@ -35,6 +37,7 @@ export function Card({ value, selected, dimmed, onClick, showValue, className }:
       className={[
         'xcard',
         selected ? 'xcard--selected' : '',
+        claimed ? 'xcard--claimed' : '',
         dimmed ? 'xcard--dimmed' : '',
         interactive ? '' : 'xcard--static',
         className ?? '',

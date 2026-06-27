@@ -36,6 +36,22 @@
   box-shadow: 0 0 0 3px #008080, 0 8px 18px rgba(0, 0, 0, 0.28);
 }
 
+/* A set just claimed by any player, shown during the post-claim intermission. */
+.xcard--claimed {
+  transform: translateY(-8px);
+  box-shadow: 0 0 0 3px #c99600, 0 8px 20px rgba(201, 150, 0, 0.45);
+  animation: xcard-claimed-pulse 900ms ease-in-out infinite alternate;
+}
+
+@keyframes xcard-claimed-pulse {
+  from {
+    box-shadow: 0 0 0 3px #c99600, 0 8px 20px rgba(201, 150, 0, 0.35);
+  }
+  to {
+    box-shadow: 0 0 0 4px #ffbf00, 0 10px 26px rgba(201, 150, 0, 0.6);
+  }
+}
+
 .xcard--dimmed {
   filter: grayscale(0.5) opacity(0.55);
 }
