@@ -1,5 +1,5 @@
 /** Landing screen: solo timed game + multiplayer (create / join / quick match). */
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../auth/AuthProvider';
 import { createGame, joinGame, quickMatch } from '../lib/api';
 import { formatTime } from '../lib/format';
@@ -21,7 +21,12 @@ export function Home({ onStartSolo, onStartAi, onEnterGame }: HomeProps) {
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
   const [botCount, setBotCount] = useState(2);
   const [skill, setSkill] = useState<BotSkill>('even');
-  const [code, setCode] = useState('');
+  // A QR/shared link lands here as ?room=CODE — prefill it and auto-join.
+  const initialRoom = useMemo(
+    () => new URLSearchParams(window.location.search).get('room')?.trim().toUpperCase() ?? '',
+    [],
+  );
+  const [code, setCode] = useState(initialRoom);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const best = getBest(difficulty);
@@ -40,6 +45,19 @@ export function Home({ onStartSolo, onStartAi, onEnterGame }: HomeProps) {
       setBusy(null);
     }
   };
+
+  // Join the room from the link once auth is ready, then drop the param so a
+  // refresh or back-navigation doesn't re-trigger the join.
+  const autoJoined = useRef(false);
+  useEffect(() => {
+    if (!initialRoom || autoJoined.current || !online) return;
+    autoJoined.current = true;
+    const url = new URL(window.location.href);
+    url.searchParams.delete('room');
+    window.history.replaceState({}, '', url.toString());
+    run('join', () => joinGame(initialRoom));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [online, initialRoom]);
 
   return (
     <main className="home">

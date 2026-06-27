@@ -1,5 +1,6 @@
 /** Multiplayer room: lobby -> active board -> results, driven by realtime state. */
 import { useEffect, useMemo, useState } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import { Table } from '../components/Table';
 import { useGame } from '../hooks/useGame';
 import { useAuth } from '../auth/AuthProvider';
@@ -194,6 +195,9 @@ function Lobby({
   onStart: () => void;
   players: GamePlayerRow[];
 }) {
+  // Build the join link off the host's current origin so it works across every
+  // domain the app is served from (play.xor0game.com, play.xorogame.com, …).
+  const joinUrl = `${window.location.origin}${import.meta.env.BASE_URL}?room=${code}`;
   return (
     <div className="lobby">
       <h2>Waiting room</h2>
@@ -213,6 +217,10 @@ function Lobby({
       ) : (
         <p className="lobby__hint">Waiting for the host to start…</p>
       )}
+      <div className="lobby__qr">
+        <QRCodeSVG className="lobby__qrcode" value={joinUrl} size={512} marginSize={2} />
+        <p className="lobby__hint">Or scan to join from your phone</p>
+      </div>
     </div>
   );
 }

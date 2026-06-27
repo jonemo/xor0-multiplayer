@@ -194,6 +194,17 @@
   border-radius: 8px;
   padding: 6px 18px;
 }
+.lobby__qr {
+  margin-top: 24px;
+}
+.lobby__qrcode {
+  width: 50%;
+  height: auto;
+  max-width: 320px;
+  border: 8px solid #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}
 
 /* Results */
 .results {
