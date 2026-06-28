@@ -9,9 +9,6 @@
       small sizes (noted in Phase 0). Tune sizing/spacing.
 - [ ] **Multiplayer niceties:** start countdown, handle a player leaving mid-game,
       reconnect/resume, "ready" states in the lobby.
-- [ ] **Leaderboard requires non-anon account:** Anon users' scores should not show on
-      the leader board. Anon users should see a hint at the end of each round that 
-      to appear on the leaderboard they need to claim their account and pick a username.
 
 ## Tech debt / infra
 

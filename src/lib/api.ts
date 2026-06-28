@@ -94,6 +94,7 @@ export async function recordSoloScoreRemote(userId: string, score: SoloScore): P
     time_ms: score.timeMs,
     cards: score.cards,
     dots: score.dots,
+    incorrect_guesses: score.incorrectGuesses,
   });
 }
 
@@ -103,16 +104,23 @@ export interface LeaderboardEntry {
   timeMs: number;
   cards: number;
   dots: number;
+  incorrectGuesses: number;
 }
 
-/** Top entries (best run per player) for a difficulty. */
+/**
+ * Top entries (best run per player) for a difficulty. `since` bounds the window
+ * (null = all-time); the RPC takes a raw cutoff so the set of offered windows is
+ * a frontend-only choice. Anonymous guests are filtered out server-side.
+ */
 export async function fetchLeaderboard(
   difficulty: Difficulty,
+  since: Date | null = null,
   limit = 20,
 ): Promise<LeaderboardEntry[]> {
   const sb = requireSupabase();
   const { data, error } = await sb.rpc('get_solo_leaderboard', {
     p_difficulty: difficulty,
+    p_since: since?.toISOString() ?? undefined,
     p_limit: limit,
   });
   if (error) throw new Error(error.message);
@@ -122,5 +130,6 @@ export async function fetchLeaderboard(
     timeMs: r.time_ms,
     cards: r.cards,
     dots: r.dots,
+    incorrectGuesses: r.incorrect_guesses,
   }));
 }

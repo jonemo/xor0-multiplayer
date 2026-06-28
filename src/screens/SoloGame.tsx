@@ -1,6 +1,8 @@
 /** Solo timed game screen. */
 import { useRef, useState } from 'react';
 import { Table } from '../components/Table';
+import { AccountDialog } from '../components/AccountDialog';
+import { useAuth } from '../auth/AuthProvider';
 import { useSoloGame } from '../hooks/useSoloGame';
 import { useTableKeyboard } from '../hooks/useTableKeyboard';
 import { scoreOf } from '../lib/solo';
@@ -164,15 +166,22 @@ function GameOver({
   onPlayAgain: () => void;
   onExit: () => void;
 }) {
+  const auth = useAuth();
+  const [showAccount, setShowAccount] = useState(false);
   const best = getBest(difficulty);
   const total = DIFFICULTY[difficulty].deckSize;
+  // Eligible guests don't appear on the public leaderboard until they claim an
+  // account and pick a username (a hint-disqualified run wouldn't count anyway).
+  const showClaimNudge = auth.isAnonymous && !summary.hintUsed;
   return (
     <div className="overlay">
       <div className="overlay__card">
         <h2>Deck cleared!</h2>
         <p className="overlay__time">{formatTime(summary.timeMs)}</p>
         <p className="overlay__line">
-          {summary.cards} / {total} cards · {summary.dots} dots
+          {summary.cards} / {total} cards · {summary.dots} dots ·{' '}
+          {summary.incorrectGuesses} wrong{' '}
+          {summary.incorrectGuesses === 1 ? 'guess' : 'guesses'}
         </p>
         {summary.hintUsed ? (
           <p className="overlay__best">Hint used — this run doesn’t count toward the leaderboard.</p>
@@ -183,6 +192,17 @@ function GameOver({
             Best: {formatTime(best.timeMs)} ({best.cards} cards)
           </p>
         ) : null}
+        {showClaimNudge && (
+          <div className="overlay__claim">
+            <p className="overlay__claim-text">
+              You’re playing as a guest. Claim your account and pick a username to appear on
+              the leaderboard.
+            </p>
+            <button className="btn btn--primary" onClick={() => setShowAccount(true)}>
+              Claim your account
+            </button>
+          </div>
+        )}
         <div className="overlay__actions">
           <button className="btn btn--primary" onClick={onPlayAgain}>
             Play again
@@ -200,6 +220,7 @@ function GameOver({
           🛒 Buy the physical game
         </a>
       </div>
+      {showAccount && <AccountDialog onClose={() => setShowAccount(false)} />}
     </div>
   );
 }

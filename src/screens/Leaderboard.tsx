@@ -8,6 +8,16 @@ import './Leaderboard.css';
 
 const ORDER: Difficulty[] = ['easy', 'medium', 'normal', 'master'];
 
+const DAY = 86_400_000;
+// Time windows are a frontend-only concern — the RPC takes a raw cutoff, so adding
+// or retuning a window is just an entry here. `ms: null` means all-time.
+const WINDOWS: { label: string; ms: number | null }[] = [
+  { label: 'All time', ms: null },
+  { label: '24 hours', ms: DAY },
+  { label: '7 days', ms: 7 * DAY },
+  { label: '90 days', ms: 90 * DAY },
+];
+
 export interface LeaderboardProps {
   onExit: () => void;
 }
@@ -15,6 +25,7 @@ export interface LeaderboardProps {
 export function Leaderboard({ onExit }: LeaderboardProps) {
   const auth = useAuth();
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
+  const [windowMs, setWindowMs] = useState<number | null>(null);
   const [entries, setEntries] = useState<LeaderboardEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,7 +33,8 @@ export function Leaderboard({ onExit }: LeaderboardProps) {
     let active = true;
     setEntries(null);
     setError(null);
-    fetchLeaderboard(difficulty)
+    const since = windowMs == null ? null : new Date(Date.now() - windowMs);
+    fetchLeaderboard(difficulty, since)
       .then((rows) => {
         if (active) setEntries(rows);
       })
@@ -32,7 +44,7 @@ export function Leaderboard({ onExit }: LeaderboardProps) {
     return () => {
       active = false;
     };
-  }, [difficulty]);
+  }, [difficulty, windowMs]);
 
   return (
     <main className="lb">
@@ -58,6 +70,20 @@ export function Leaderboard({ onExit }: LeaderboardProps) {
         ))}
       </div>
 
+      <div className="lb__windows" role="radiogroup" aria-label="Time period">
+        {WINDOWS.map((w) => (
+          <button
+            key={w.label}
+            role="radio"
+            aria-checked={windowMs === w.ms}
+            className={`lb__window${windowMs === w.ms ? ' lb__window--on' : ''}`}
+            onClick={() => setWindowMs(w.ms)}
+          >
+            {w.label}
+          </button>
+        ))}
+      </div>
+
       <section className="lb__panel">
         {error ? (
           <p className="lb__empty">{error}</p>
@@ -75,6 +101,9 @@ export function Leaderboard({ onExit }: LeaderboardProps) {
                 <span className="lb__rank">{i + 1}</span>
                 <span className="lb__name">{e.displayName}</span>
                 <span className="lb__cards">{e.cards} cards</span>
+                <span className="lb__wrong">
+                  {e.incorrectGuesses} wrong
+                </span>
                 <span className="lb__time">{formatTime(e.timeMs)}</span>
               </li>
             ))}

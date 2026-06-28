@@ -30,14 +30,24 @@ describe('createSoloGame', () => {
 });
 
 describe('attemptClaim', () => {
-  it('rejects an invalid (non-zero-XOR) selection without changing state', () => {
+  it('rejects an invalid (non-zero-XOR) selection: counts the miss, banks nothing', () => {
     const g = createSoloGame('normal', 1, 0);
     const bad = g.table.slice(0, 3);
     if (!isValidGroup(bad)) {
       const { state, result } = attemptClaim(g, bad, 0);
       expect(result).toBe('invalid');
-      expect(state).toBe(g);
+      // table/collected untouched, but the incorrect-guess counter ticks up
+      expect(state.table).toEqual(g.table);
+      expect(state.collected).toEqual(g.collected);
+      expect(state.incorrectAttempts).toBe(g.incorrectAttempts + 1);
     }
+  });
+
+  it('does not count a valid claim as an incorrect guess', () => {
+    const g = createSoloGame('normal', 3, 0);
+    const group = soloHint(g)!;
+    const { state } = attemptClaim(g, group, 0);
+    expect(state.incorrectAttempts).toBe(0);
   });
 
   it('rejects cards not on the table', () => {
@@ -90,5 +100,15 @@ describe('scoreOf', () => {
     const s = scoreOf(g, 4000);
     expect(s.timeMs).toBe(3000);
     expect(s.cards).toBe(0);
+    expect(s.incorrectGuesses).toBe(0);
+  });
+
+  it('carries the incorrect-guess count into the score', () => {
+    let g = createSoloGame('normal', 1, 0);
+    const bad = g.table.slice(0, 3);
+    if (!isValidGroup(bad)) {
+      g = attemptClaim(g, bad, 0).state;
+      expect(scoreOf(g, 0).incorrectGuesses).toBe(1);
+    }
   });
 });

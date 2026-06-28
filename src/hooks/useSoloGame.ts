@@ -80,8 +80,10 @@ export function useSoloGame(initialDifficulty: Difficulty): UseSoloGame {
 
   const claim = useCallback((): ClaimResult => {
     const { state: next, result } = attemptClaim(state, selected);
+    // A rejected claim still advances state (it bumps the incorrect-guess
+    // counter), so always commit `next`; only clear the selection on success.
+    setState(next);
     if (result === 'ok') {
-      setState(next);
       setSelected([]);
       setHinted([]);
     }

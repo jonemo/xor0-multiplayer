@@ -139,6 +139,18 @@
   color: var(--orange);
   font-weight: 800;
 }
+.overlay__claim {
+  margin-top: 14px;
+  padding: 12px;
+  background: #f0f7f7;
+  border: 1px solid #d6eaea;
+  border-radius: 12px;
+}
+.overlay__claim-text {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: #555;
+}
 .overlay__actions {
   display: flex;
   gap: 10px;

@@ -37,6 +37,8 @@ export interface SoloState {
   finishedAt: number | null;
   /** True once the player has revealed a hint — exempts the run from leaderboards. */
   hintUsed: boolean;
+  /** Count of rejected claims (bad XORO or off-table) — shown on the leaderboard. */
+  incorrectAttempts: number;
 }
 
 export interface SoloScore {
@@ -44,6 +46,7 @@ export interface SoloScore {
   dots: number;
   timeMs: number;
   difficulty: Difficulty;
+  incorrectGuesses: number;
 }
 
 function deckRemaining(s: SoloState): number {
@@ -88,6 +91,7 @@ export function createSoloGame(
     startedAt: now,
     finishedAt: null,
     hintUsed: false,
+    incorrectAttempts: 0,
   };
   return ensurePlayable(state, now);
 }
@@ -103,11 +107,15 @@ export function attemptClaim(
   now: number = Date.now(),
 ): { state: SoloState; result: ClaimResult } {
   if (state.status !== 'playing') return { state, result: 'not-playing' };
-  if (!isValidGroup(values)) return { state, result: 'invalid' };
+  const miss = (result: ClaimResult) => ({
+    state: { ...state, incorrectAttempts: state.incorrectAttempts + 1 },
+    result,
+  });
+  if (!isValidGroup(values)) return miss('invalid');
 
   const onTable = new Set(state.table);
   if (!values.every((v) => onTable.has(v))) {
-    return { state, result: 'not-on-table' };
+    return miss('not-on-table');
   }
 
   const claimed = new Set(values);
@@ -132,5 +140,6 @@ export function scoreOf(state: SoloState, now: number = Date.now()): SoloScore {
     dots: state.collected.reduce((sum, v) => sum + popcount(v), 0),
     timeMs: end - state.startedAt,
     difficulty: state.difficulty,
+    incorrectGuesses: state.incorrectAttempts,
   };
 }

@@ -218,6 +218,7 @@ export type Database = {
           difficulty: string
           dots: number
           id: number
+          incorrect_guesses: number
           time_ms: number
           user_id: string
         }
@@ -227,6 +228,7 @@ export type Database = {
           difficulty: string
           dots: number
           id?: never
+          incorrect_guesses?: number
           time_ms: number
           user_id: string
         }
@@ -236,6 +238,7 @@ export type Database = {
           difficulty?: string
           dots?: number
           id?: never
+          incorrect_guesses?: number
           time_ms?: number
           user_id?: string
         }
@@ -276,12 +279,13 @@ export type Database = {
         }
       }
       get_solo_leaderboard: {
-        Args: { p_difficulty: string; p_limit?: number }
+        Args: { p_difficulty: string; p_limit?: number; p_since?: string }
         Returns: {
           cards: number
           created_at: string
           display_name: string
           dots: number
+          incorrect_guesses: number
           time_ms: number
           user_id: string
         }[]
