@@ -18,7 +18,19 @@ export function SoloGame({ difficulty, onExit }: SoloGameProps) {
   const { state, elapsedMs, selected } = game;
   const [showValues, setShowValues] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [showHintWarning, setShowHintWarning] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  // The first hint of a game is warned about (it exempts the run from the
+  // leaderboard); after the player acknowledges, further hints reveal directly.
+  const onHint = () => {
+    if (state.hintUsed) game.hint();
+    else setShowHintWarning(true);
+  };
+  const confirmHint = () => {
+    setShowHintWarning(false);
+    game.hint();
+  };
 
   // Solo has no penalty: a wrong claim just gets brief feedback, no time/score
   // cost (parallels multiplayer where the UI also never blocks a bad claim).
@@ -79,8 +91,8 @@ export function SoloGame({ difficulty, onExit }: SoloGameProps) {
         <button className="btn btn--ghost" disabled={!selected.length} onClick={game.clearSelection}>
           Clear
         </button>
-        <button className="btn btn--ghost" disabled={state.status !== 'playing'} onClick={game.hint}>
-          Hint
+        <button className="btn btn--ghost" disabled={state.status !== 'playing'} onClick={onHint}>
+          Hint{state.hintUsed && <span className="btn__sub">no leaderboard</span>}
         </button>
         <label className="solo__toggle">
           <input
@@ -91,6 +103,26 @@ export function SoloGame({ difficulty, onExit }: SoloGameProps) {
           Show numbers
         </label>
       </footer>
+
+      {showHintWarning && (
+        <div className="overlay">
+          <div className="overlay__card">
+            <h2>Use a hint?</h2>
+            <p className="overlay__line">
+              Hints reveal a valid XORO on the table. Using one in this game means the run
+              won’t count toward your best times or the leaderboard.
+            </p>
+            <div className="overlay__actions">
+              <button className="btn btn--primary" onClick={confirmHint}>
+                Show hint
+              </button>
+              <button className="btn btn--ghost" onClick={() => setShowHintWarning(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {state.status === 'over' && (
         <GameOver
@@ -106,7 +138,7 @@ export function SoloGame({ difficulty, onExit }: SoloGameProps) {
 
 function summarize(game: ReturnType<typeof useSoloGame>) {
   const s = scoreOf(game.state);
-  return { ...s, isBest: game.finishedBest === true };
+  return { ...s, isBest: game.finishedBest === true, hintUsed: game.state.hintUsed };
 }
 
 function GameOver({
@@ -130,7 +162,9 @@ function GameOver({
         <p className="overlay__line">
           {summary.cards} / {total} cards · {summary.dots} dots
         </p>
-        {summary.isBest ? (
+        {summary.hintUsed ? (
+          <p className="overlay__best">Hint used — this run doesn’t count toward the leaderboard.</p>
+        ) : summary.isBest ? (
           <p className="overlay__best overlay__best--new">★ New personal best!</p>
         ) : best ? (
           <p className="overlay__best">

@@ -35,6 +35,8 @@ export interface SoloState {
   status: 'playing' | 'over';
   startedAt: number;
   finishedAt: number | null;
+  /** True once the player has revealed a hint — exempts the run from leaderboards. */
+  hintUsed: boolean;
 }
 
 export interface SoloScore {
@@ -85,6 +87,7 @@ export function createSoloGame(
     status: 'playing',
     startedAt: now,
     finishedAt: null,
+    hintUsed: false,
   };
   return ensurePlayable(state, now);
 }

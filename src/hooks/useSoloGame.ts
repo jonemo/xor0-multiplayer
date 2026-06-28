@@ -51,6 +51,12 @@ export function useSoloGame(initialDifficulty: Difficulty): UseSoloGame {
   useEffect(() => {
     if (state.status === 'over' && !recordedRef.current) {
       recordedRef.current = true;
+      // A run where the player revealed a hint is not eligible for any
+      // leaderboard (local best or global) — otherwise it'd be trivial to cheat.
+      if (state.hintUsed) {
+        setFinishedBest(false);
+        return;
+      }
       const score = scoreOf(state);
       setFinishedBest(recordSoloScore(score));
       if (configured && user) {
@@ -84,6 +90,7 @@ export function useSoloGame(initialDifficulty: Difficulty): UseSoloGame {
 
   const hint = useCallback(() => {
     setHinted(soloHint(state) ?? []);
+    setState((s) => (s.hintUsed ? s : { ...s, hintUsed: true }));
   }, [state]);
 
   const newGame = useCallback((difficulty?: Difficulty) => {
