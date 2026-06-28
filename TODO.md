@@ -30,6 +30,9 @@ verified (including a real two-human multiplayer test). What's left:
       (`AuthProvider.updateDisplayName` → `profiles`). Guests keep "Player NNNN".
 - [ ] **Multiplayer niceties:** start countdown, handle a player leaving mid-game,
       reconnect/resume, "ready" states in the lobby.
+- [ ] **Leaderboard requires non-anon account:** Anon users' scores should not show on
+      the leader board. Anon users should see a hint at the end of each round that 
+      to appear on the leaderboard they need to claim their account and pick a username.
 
 ## Tech debt / infra
 
@@ -38,7 +41,7 @@ verified (including a real two-human multiplayer test). What's left:
 - [ ] **Realtime latency.** If claims feel laggy for spectators, consider Supabase
       Broadcast (lower latency) in addition to Postgres Changes. Authority stays in
       the RPC, so this is display-only.
-- [ ] **Housekeeping for abandoned games.** Anonymous guests + abandoned/finished
+- [x] **Housekeeping for abandoned games.** Anonymous guests + abandoned/finished
       games accumulate in Supabase. Add a periodic purge (pg_cron) of old finished/
       lobby games and stale anonymous users.
 - [x] **Security review** before any real traffic (`/security-review` on the diff).
