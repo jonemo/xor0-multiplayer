@@ -53,6 +53,32 @@ npm run build       # tsc + vite build -> dist/
    (`src/hooks/useGame.ts`). Authority is the RPC return value; realtime is for
    showing other players' updates.
 
+## Security posture — the mindset
+
+Read this before touching RPCs, RLS, or anything that decides what a client can see
+or do.
+
+- **The client is fully untrusted.** The browser bundle ships the Supabase URL and
+  the **public anon key**, so *anyone* — not just our UI — can hit PostgREST and call
+  every `public` RPC directly, and read any row their RLS allows. Treat the UI as one
+  possible client among many. Every rule that matters is enforced **server-side** in
+  Postgres (RLS + `SECURITY DEFINER` RPCs that check `auth.uid()` / host / membership
+  / game status). Client-side checks are UX, never security.
+- **The repo is public on purpose.** Security must never rely on the source or the
+  SQL logic being secret — an attacker can and should be assumed to read every RLS
+  policy and RPC body. That's a feature: fully auditable code that lets anyone confirm
+  there's no trust placed in the client. The flip side: a logic flaw in a migration is
+  readable, not just probeable, so fix flaws — don't hope nobody looks.
+- **No secrets in the repo.** The only credential anywhere is the public anon key, and
+  it isn't even committed (`.env` gitignored; CI injects it from Actions *variables*).
+  Never commit the `service_role`/secret key, JWT secret, or DB connection string.
+- **RLS is row-level, not column-level.** A SELECT policy exposes the *entire* row.
+  Do not put hidden game state in a client-readable row. ⚠️ Known issue: `games`
+  stores the full shuffled `deck_order` + `deck_pointer`, so any member (and any user
+  for `visibility='public'` games) can read the future deck and pre-compute optimal
+  claims — undetectable cheating. Hidden state belongs in a separate table with no
+  client SELECT, or behind a column-limited view/RPC. See `TODO.md`.
+
 ## Project layout
 
 ```

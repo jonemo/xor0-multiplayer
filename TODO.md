@@ -41,7 +41,7 @@ verified (including a real two-human multiplayer test). What's left:
 - [ ] **Housekeeping for abandoned games.** Anonymous guests + abandoned/finished
       games accumulate in Supabase. Add a periodic purge (pg_cron) of old finished/
       lobby games and stale anonymous users.
-- [ ] **Security review** before any real traffic (`/security-review` on the diff).
+- [x] **Security review** before any real traffic (`/security-review` on the diff).
       Re-check RLS read policies and that no RPC leaks deck order beyond the table.
 - [ ] **Bundle size.** ~110 KB gzip, mostly supabase-js. Fine for now; revisit if it
       grows. Solo doesn't need supabase-js — could lazy-load it for online modes.
