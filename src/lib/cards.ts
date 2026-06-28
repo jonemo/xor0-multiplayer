@@ -3,7 +3,7 @@
  *
  * Cards are rendered procedurally (not from 63 static SVGs). Each card is a
  * low-poly mesh background with a dot for each set bit. The bit/position/color
- * mapping below is taken from the source art in autosvg/ (Inkscape layers
+ * mapping below is taken from the original Inkscape source art (layers
  * dot1..dot32) and confirmed by the game owner.
  *
  *   bit  position       color
@@ -28,7 +28,7 @@ export interface DotSlot {
   cy: number;
 }
 
-/** Exact dot colors extracted from the print art (autosvg/*.svg). */
+/** Exact dot colors extracted from the original print art. */
 export const COLOR_HEX: Record<Color, string> = {
   orange: '#aa4400',
   blue: '#353d5f',

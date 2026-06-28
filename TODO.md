@@ -7,7 +7,7 @@ verified (including a real two-human multiplayer test). What's left:
 ## Phase 5 — polish (the main remaining work)
 
 - [ ] **Branding / favicon.** Real favicon + the "Xor0" wordmark and low-poly mesh
-      from `design_files/`. Card backgrounds currently use a simple generated mesh
+      from the original design art. Card backgrounds currently use a simple generated mesh
       in `Card.tsx` — consider matching the print art more closely.
 - [ ] **Animations.** Claim (cards fly to the claimer), table replenish (new cards
       deal in), penalty/paused feedback, winner celebration. Today it's instant.

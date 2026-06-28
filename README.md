@@ -47,5 +47,4 @@ src/screens/     Home, SoloGame, MultiplayerGame
 src/hooks/       useSoloGame, useGame (realtime)
 src/auth/        AuthProvider (anonymous sign-in + optional email link)
 supabase/migrations/   SQL schema, RLS, and RPCs
-design_files/, autosvg/   card art + branding (reference)
 ```

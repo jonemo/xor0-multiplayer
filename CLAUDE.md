@@ -72,7 +72,6 @@ src/auth/         # AuthProvider (anonymous sign-in + optional email link)
 supabase/migrations/   # 0001 profiles+helpers, 0002 tables+RLS+realtime, 0003 RPCs,
                        #   0004 hardening, 0005 gen_code fix
 .github/workflows/deploy.yml   # build + publish to GitHub Pages
-design_files/, autosvg/        # card art + branding (reference; not all shipped)
 ```
 
 ## Database / Supabase
@@ -100,7 +99,8 @@ Cards are rendered procedurally (`src/components/Card.tsx`), not from the 63 SVG
 | 32  | top-right     | red    | #800000  |
 
 Each dot is labeled with its bit value, mirror-printed (upright + 180°), like the
-physical cards. `autosvg/NN.svg` = card value NN (reference art).
+physical cards. (The original per-card reference art lived in `autosvg/`, kept
+outside the repo.)
 
 ## Deploy
 
