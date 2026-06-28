@@ -66,6 +66,32 @@ export type Database = {
           },
         ]
       }
+      game_decks: {
+        Row: {
+          deck_order: number[]
+          deck_pointer: number
+          game_id: string
+        }
+        Insert: {
+          deck_order: number[]
+          deck_pointer?: number
+          game_id: string
+        }
+        Update: {
+          deck_order?: number[]
+          deck_pointer?: number
+          game_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_decks_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: true
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       game_players: {
         Row: {
           card_count: number
@@ -120,8 +146,6 @@ export type Database = {
         Row: {
           code: string
           created_at: string
-          deck_order: number[]
-          deck_pointer: number
           difficulty: string
           finished_at: string | null
           host_id: string
@@ -138,8 +162,6 @@ export type Database = {
         Insert: {
           code: string
           created_at?: string
-          deck_order: number[]
-          deck_pointer?: number
           difficulty: string
           finished_at?: string | null
           host_id: string
@@ -156,8 +178,6 @@ export type Database = {
         Update: {
           code?: string
           created_at?: string
-          deck_order?: number[]
-          deck_pointer?: number
           difficulty?: string
           finished_at?: string | null
           host_id?: string
@@ -235,8 +255,6 @@ export type Database = {
         Returns: {
           code: string
           created_at: string
-          deck_order: number[]
-          deck_pointer: number
           difficulty: string
           finished_at: string | null
           host_id: string
@@ -257,13 +275,22 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_solo_leaderboard: {
+        Args: { p_difficulty: string; p_limit?: number }
+        Returns: {
+          cards: number
+          created_at: string
+          display_name: string
+          dots: number
+          time_ms: number
+          user_id: string
+        }[]
+      }
       join_game: {
         Args: { p_code: string }
         Returns: {
           code: string
           created_at: string
-          deck_order: number[]
-          deck_pointer: number
           difficulty: string
           finished_at: string | null
           host_id: string
@@ -289,8 +316,6 @@ export type Database = {
         Returns: {
           code: string
           created_at: string
-          deck_order: number[]
-          deck_pointer: number
           difficulty: string
           finished_at: string | null
           host_id: string
@@ -311,25 +336,12 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      get_solo_leaderboard: {
-        Args: { p_difficulty: string; p_limit?: number }
-        Returns: {
-          user_id: string
-          display_name: string
-          time_ms: number
-          cards: number
-          dots: number
-          created_at: string
-        }[]
-      }
       leave_game: { Args: { p_game_id: string }; Returns: undefined }
       restart_game: {
         Args: { p_game_id: string }
         Returns: {
           code: string
           created_at: string
-          deck_order: number[]
-          deck_pointer: number
           difficulty: string
           finished_at: string | null
           host_id: string
@@ -355,8 +367,6 @@ export type Database = {
         Returns: {
           code: string
           created_at: string
-          deck_order: number[]
-          deck_pointer: number
           difficulty: string
           finished_at: string | null
           host_id: string

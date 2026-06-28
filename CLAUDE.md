@@ -72,12 +72,15 @@ or do.
 - **No secrets in the repo.** The only credential anywhere is the public anon key, and
   it isn't even committed (`.env` gitignored; CI injects it from Actions *variables*).
   Never commit the `service_role`/secret key, JWT secret, or DB connection string.
-- **RLS is row-level, not column-level.** A SELECT policy exposes the *entire* row.
-  Do not put hidden game state in a client-readable row. ⚠️ Known issue: `games`
-  stores the full shuffled `deck_order` + `deck_pointer`, so any member (and any user
-  for `visibility='public'` games) can read the future deck and pre-compute optimal
-  claims — undetectable cheating. Hidden state belongs in a separate table with no
-  client SELECT, or behind a column-limited view/RPC. See `TODO.md`.
+- **RLS is row-level, not column-level.** A SELECT policy exposes the *entire* row, so
+  never put hidden game state in a client-readable row — it belongs in a separate table
+  with no client SELECT. The shuffled deck follows this rule: `deck_order` +
+  `deck_pointer` live in **`public.game_decks`** (migration `0011`), which has RLS
+  enabled with *no* policies and `revoke all` from `anon`/`authenticated`, so clients
+  get a hard `permission denied` and the deck never rides along in a `games` row,
+  realtime payload, or `returns public.games` RPC result. Only the `SECURITY DEFINER`
+  RPCs (`start_game`, `claim_group`, `restart_game`) touch it. **Never** add deck
+  columns back to `games`, and never add `game_decks` to the realtime publication.
 
 ## Project layout
 
@@ -96,7 +99,8 @@ src/screens/      # Home, SoloGame, MultiplayerGame
 src/hooks/        # useSoloGame, useGame (realtime)
 src/auth/         # AuthProvider (anonymous sign-in + optional email link)
 supabase/migrations/   # 0001 profiles+helpers, 0002 tables+RLS+realtime, 0003 RPCs,
-                       #   0004 hardening, 0005 gen_code fix
+                       #   0004 hardening, 0005 gen_code fix, … 0011 deck moved to
+                       #   private game_decks table (deck no longer client-readable)
 .github/workflows/deploy.yml   # build + publish to GitHub Pages
 ```
 
@@ -110,6 +114,8 @@ supabase/migrations/   # 0001 profiles+helpers, 0002 tables+RLS+realtime, 0003 R
   user-facing RPCs are in `public`. SQL functions pin `search_path`.
 - Advisor note: the remaining `0029` "authenticated can execute SECURITY DEFINER"
   warnings are **by design** (that's how clients mutate safely) — don't "fix" them.
+  Likewise the `0008` "RLS enabled, no policy" INFO on `public.game_decks` is **by
+  design** — the empty policy set is the deny-all that hides the deck.
 
 ## Card rendering (bit → position → color)
 

@@ -63,9 +63,15 @@ export async function claimGroup(
   return (data as { outcome: ClaimOutcome }).outcome;
 }
 
+// Explicit column list (never the deck — it no longer lives on `games`, see
+// migration 0011). Keeping the projection explicit documents what the client needs
+// and guards against a future column accidentally being shipped to players.
+const GAME_COLUMNS =
+  'id, code, visibility, status, difficulty, mode, table_size, table_cards, host_id, winner_id, created_at, started_at, finished_at, updated_at' as const;
+
 export async function fetchGameById(gameId: string): Promise<GameRow | null> {
   const sb = requireSupabase();
-  const { data } = await sb.from('games').select('*').eq('id', gameId).maybeSingle();
+  const { data } = await sb.from('games').select(GAME_COLUMNS).eq('id', gameId).maybeSingle();
   return data ?? null;
 }
 
