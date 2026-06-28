@@ -311,6 +311,17 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_solo_leaderboard: {
+        Args: { p_difficulty: string; p_limit?: number }
+        Returns: {
+          user_id: string
+          display_name: string
+          time_ms: number
+          cards: number
+          dots: number
+          created_at: string
+        }[]
+      }
       leave_game: { Args: { p_game_id: string }; Returns: undefined }
       restart_game: {
         Args: { p_game_id: string }

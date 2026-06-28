@@ -20,15 +20,16 @@ verified (including a real two-human multiplayer test). What's left:
 
 ## Features / UX
 
-- [ ] **Solo leaderboard.** `solo_scores` table + RLS already exist; wire
-      `leaderboard.ts` to also write there when authed (see the TODO in that file)
-      and add a leaderboard screen. Currently best times are localStorage-only.
-- [ ] **Email upgrade UI.** `AuthProvider.linkEmail()` exists but there's no UI to
-      let a guest attach an email and keep their stats/name.
-- [ ] **Editable display name.** Profiles get a random "Player NNNN" name; let users
-      rename (write to `profiles`, which already allows owner updates).
-- [ ] **Multiplayer niceties:** rematch button, start countdown, handle a player
-      leaving mid-game, reconnect/resume, "ready" states in the lobby.
+- [x] **Solo leaderboard.** `get_solo_leaderboard` RPC (`0008`) + `fetchLeaderboard`
+      back a `Leaderboard` screen; `useSoloGame` writes finished runs to `solo_scores`
+      when signed in (guests included). Personal best still in localStorage.
+- [x] **Email upgrade UI.** `AccountDialog` lets a guest attach an email
+      (`AuthProvider.upgradeWithEmail`) and keep their name/stats, or sign in to an
+      existing account (`signInWithEmail`). Passwordless magic link.
+- [x] **Editable display name.** Registered users can rename via `AccountDialog`
+      (`AuthProvider.updateDisplayName` → `profiles`). Guests keep "Player NNNN".
+- [ ] **Multiplayer niceties:** start countdown, handle a player leaving mid-game,
+      reconnect/resume, "ready" states in the lobby.
 
 ## Tech debt / infra
 
@@ -44,15 +45,6 @@ verified (including a real two-human multiplayer test). What's left:
       Re-check RLS read policies and that no RPC leaks deck order beyond the table.
 - [ ] **Bundle size.** ~110 KB gzip, mostly supabase-js. Fine for now; revisit if it
       grows. Solo doesn't need supabase-js — could lazy-load it for online modes.
-
-## Known caveats (context, not necessarily action items)
-
-- The game publishes its own optimal algorithm (`xor0_instructions.md`), so a
-  scripted bot can always win public multiplayer — competitive integrity there is
-  inherently limited. Fine for a casual/social game.
-- `public/CNAME` is redundant with the Pages API cname setting but harmless.
-- Workflow actions are current (checkout@v7 / setup-node@v6 / pages@v5); revisit if
-  GitHub deprecates them again.
 
 ## Quick orientation for a new session
 

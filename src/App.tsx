@@ -4,12 +4,14 @@ import { AuthProvider } from './auth/AuthProvider';
 import { Home } from './screens/Home';
 import { SoloGame } from './screens/SoloGame';
 import { MultiplayerGame } from './screens/MultiplayerGame';
+import { Leaderboard } from './screens/Leaderboard';
 import type { Difficulty } from './lib/xor';
 
 type View =
   | { name: 'home' }
   | { name: 'solo'; difficulty: Difficulty }
-  | { name: 'game'; gameId: string };
+  | { name: 'game'; gameId: string }
+  | { name: 'leaderboard' };
 
 export function App() {
   const [view, setView] = useState<View>({ name: 'home' });
@@ -21,10 +23,13 @@ export function App() {
         <SoloGame key={view.difficulty} difficulty={view.difficulty} onExit={home} />
       ) : view.name === 'game' ? (
         <MultiplayerGame key={view.gameId} gameId={view.gameId} onExit={home} />
+      ) : view.name === 'leaderboard' ? (
+        <Leaderboard onExit={home} />
       ) : (
         <Home
           onStartSolo={(difficulty) => setView({ name: 'solo', difficulty })}
           onEnterGame={(gameId) => setView({ name: 'game', gameId })}
+          onShowLeaderboard={() => setView({ name: 'leaderboard' })}
         />
       )}
     </AuthProvider>

@@ -9,6 +9,8 @@ import {
   type SoloState,
 } from '../lib/solo';
 import { recordSoloScore } from '../lib/leaderboard';
+import { recordSoloScoreRemote } from '../lib/api';
+import { useAuth } from '../auth/AuthProvider';
 import type { CardValue, Difficulty } from '../lib/xor';
 
 export interface UseSoloGame {
@@ -29,6 +31,7 @@ export interface UseSoloGame {
 }
 
 export function useSoloGame(initialDifficulty: Difficulty): UseSoloGame {
+  const { user, configured } = useAuth();
   const [state, setState] = useState<SoloState>(() => createSoloGame(initialDifficulty));
   const [selected, setSelected] = useState<CardValue[]>([]);
   const [hinted, setHinted] = useState<CardValue[]>([]);
@@ -43,13 +46,20 @@ export function useSoloGame(initialDifficulty: Difficulty): UseSoloGame {
     return () => window.clearInterval(id);
   }, [state.status]);
 
-  // Record the score once when a game ends.
+  // Record the score once when a game ends: locally (best time) and, when
+  // signed in, to the global leaderboard (best-effort — never blocks the UI).
   useEffect(() => {
     if (state.status === 'over' && !recordedRef.current) {
       recordedRef.current = true;
-      setFinishedBest(recordSoloScore(scoreOf(state)));
+      const score = scoreOf(state);
+      setFinishedBest(recordSoloScore(score));
+      if (configured && user) {
+        recordSoloScoreRemote(user.id, score).catch(() => {
+          /* offline / transient — local best is already saved */
+        });
+      }
     }
-  }, [state]);
+  }, [state, configured, user]);
 
   const toggle = useCallback((v: CardValue) => {
     setHinted([]);

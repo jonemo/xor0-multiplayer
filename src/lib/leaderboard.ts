@@ -1,9 +1,9 @@
 /**
  * Local solo-score persistence (best times per difficulty).
  *
- * Phase 1 stores results in localStorage. Once auth + the `solo_scores` table
- * land (Phase 2/3), `recordSoloScore` will additionally upsert to Supabase for
- * a global leaderboard — see TODO below.
+ * This stores the player's personal best in localStorage. The global leaderboard
+ * is written separately from `useSoloGame` via `recordSoloScoreRemote` when the
+ * player is signed in (anonymous or permanent).
  */
 import type { Difficulty } from './xor';
 import type { SoloScore } from './solo';
@@ -61,6 +61,5 @@ export function recordSoloScore(score: SoloScore): boolean {
     write(map);
   }
 
-  // TODO(Phase 2/3): if authed + Supabase configured, insert into `solo_scores`.
   return isBetter;
 }

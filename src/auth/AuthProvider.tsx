@@ -21,11 +21,25 @@ interface AuthValue {
   user: User | null;
   session: Session | null;
   displayName: string | null;
+  /** The account's email once it's a permanent (non-guest) account. */
+  email: string | null;
   /** True if the account is an anonymous (guest) sign-in. */
   isAnonymous: boolean;
   error: string | null;
-  /** Send a magic link to upgrade an anonymous account to a real one. */
-  linkEmail: (email: string) => Promise<{ error: string | null }>;
+  /**
+   * Attach an email to the current guest account to make it permanent. Sends a
+   * confirmation magic link; the same user_id (and thus name/stats) is kept.
+   */
+  upgradeWithEmail: (email: string) => Promise<{ error: string | null }>;
+  /**
+   * Sign in to an existing account via emailed magic link. On confirmation the
+   * session switches to that account, replacing the current guest session.
+   */
+  signInWithEmail: (email: string) => Promise<{ error: string | null }>;
+  /** Rename the current account (writes to `profiles`). */
+  updateDisplayName: (name: string) => Promise<{ error: string | null }>;
+  /** Sign out, then drop back to a fresh guest session so play still works. */
+  signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
 
@@ -73,9 +87,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setReady(true);
     });
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
-      if (s) loadProfile(s.user.id);
+      if (s) {
+        loadProfile(s.user.id);
+      } else {
+        // Signed out: clear the stale name and immediately start a fresh guest
+        // session so solo/online play keeps working.
+        setDisplayName(null);
+        if (event === 'SIGNED_OUT') ensureSignedIn(null);
+      }
     });
 
     return () => {
@@ -92,12 +113,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       session,
       displayName,
+      email: user?.email ?? null,
       isAnonymous: !!user?.is_anonymous,
       error,
-      linkEmail: async (email: string) => {
+      upgradeWithEmail: async (email: string) => {
         if (!supabase) return { error: 'Supabase not configured' };
-        const { error: e } = await supabase.auth.updateUser({ email });
+        const { error: e } = await supabase.auth.updateUser(
+          { email },
+          { emailRedirectTo: window.location.origin },
+        );
         return { error: e?.message ?? null };
+      },
+      signInWithEmail: async (email: string) => {
+        if (!supabase) return { error: 'Supabase not configured' };
+        const { error: e } = await supabase.auth.signInWithOtp({
+          email,
+          options: { emailRedirectTo: window.location.origin },
+        });
+        return { error: e?.message ?? null };
+      },
+      updateDisplayName: async (name: string) => {
+        if (!supabase || !user) return { error: 'Not signed in' };
+        const trimmed = name.trim();
+        if (trimmed.length < 1 || trimmed.length > 24) {
+          return { error: 'Name must be 1–24 characters' };
+        }
+        const { error: e } = await supabase
+          .from('profiles')
+          .update({ display_name: trimmed })
+          .eq('user_id', user.id);
+        if (e) return { error: e.message };
+        setDisplayName(trimmed);
+        return { error: null };
+      },
+      signOut: async () => {
+        if (!supabase) return;
+        await supabase.auth.signOut();
       },
       refreshProfile: async () => {
         if (user) await loadProfile(user.id);

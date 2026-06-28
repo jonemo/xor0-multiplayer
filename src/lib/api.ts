@@ -90,3 +90,31 @@ export async function recordSoloScoreRemote(userId: string, score: SoloScore): P
     dots: score.dots,
   });
 }
+
+export interface LeaderboardEntry {
+  userId: string;
+  displayName: string;
+  timeMs: number;
+  cards: number;
+  dots: number;
+}
+
+/** Top entries (best run per player) for a difficulty. */
+export async function fetchLeaderboard(
+  difficulty: Difficulty,
+  limit = 20,
+): Promise<LeaderboardEntry[]> {
+  const sb = requireSupabase();
+  const { data, error } = await sb.rpc('get_solo_leaderboard', {
+    p_difficulty: difficulty,
+    p_limit: limit,
+  });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((r) => ({
+    userId: r.user_id,
+    displayName: r.display_name,
+    timeMs: r.time_ms,
+    cards: r.cards,
+    dots: r.dots,
+  }));
+}

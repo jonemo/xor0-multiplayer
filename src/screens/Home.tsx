@@ -1,6 +1,7 @@
 /** Landing screen: solo timed game + multiplayer (create / join / quick match). */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../auth/AuthProvider';
+import { AccountDialog } from '../components/AccountDialog';
 import { createGame, joinGame, quickMatch } from '../lib/api';
 import { formatTime } from '../lib/format';
 import { getBest } from '../lib/leaderboard';
@@ -12,11 +13,13 @@ const ORDER: Difficulty[] = ['easy', 'medium', 'normal', 'master'];
 export interface HomeProps {
   onStartSolo: (difficulty: Difficulty) => void;
   onEnterGame: (gameId: string) => void;
+  onShowLeaderboard: () => void;
 }
 
-export function Home({ onStartSolo, onEnterGame }: HomeProps) {
+export function Home({ onStartSolo, onEnterGame, onShowLeaderboard }: HomeProps) {
   const auth = useAuth();
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
+  const [showAccount, setShowAccount] = useState(false);
   // A QR/shared link lands here as ?room=CODE — prefill it and auto-join.
   const initialRoom = useMemo(
     () => new URLSearchParams(window.location.search).get('room')?.trim().toUpperCase() ?? '',
@@ -55,8 +58,25 @@ export function Home({ onStartSolo, onEnterGame }: HomeProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [online, initialRoom]);
 
+  const accountLabel = !auth.ready
+    ? 'Signing in…'
+    : auth.isAnonymous
+      ? `${auth.displayName ?? 'guest'} (guest)`
+      : (auth.displayName ?? 'Account');
+
   return (
     <main className="home">
+      <div className="home__top">
+        <button className="home__chip" onClick={onShowLeaderboard}>
+          🏆 Leaderboard
+        </button>
+        {auth.configured && (
+          <button className="home__chip" onClick={() => setShowAccount(true)}>
+            {accountLabel}
+          </button>
+        )}
+      </div>
+
       <h1 className="home__wordmark wordmark">Xor0</h1>
       <p className="home__tagline">
         Find a set of cards whose colored dots all cancel out — every color an even number of times —
@@ -136,14 +156,9 @@ export function Home({ onStartSolo, onEnterGame }: HomeProps) {
         </form>
 
         {error && <p className="home__error">{error}</p>}
-        {auth.configured && (
-          <p className="home__who">
-            {auth.ready
-              ? `Playing as ${auth.displayName ?? 'guest'}${auth.isAnonymous ? ' (guest)' : ''}`
-              : 'Signing in…'}
-          </p>
-        )}
       </section>
+
+      {showAccount && <AccountDialog onClose={() => setShowAccount(false)} />}
     </main>
   );
 }
