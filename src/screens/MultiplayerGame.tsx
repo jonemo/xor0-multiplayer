@@ -5,7 +5,7 @@ import { Table } from '../components/Table';
 import { useGame } from '../hooks/useGame';
 import { useAuth } from '../auth/AuthProvider';
 import { claimGroup, leaveGame, restartGame, startGame } from '../lib/api';
-import { isValidGroup, popcount, type CardValue } from '../lib/xor';
+import { popcount, type CardValue } from '../lib/xor';
 import type { GamePlayerRow } from '../lib/database.types';
 import './MultiplayerGame.css';
 
@@ -65,7 +65,8 @@ export function MultiplayerGame({ gameId, onExit }: MultiplayerGameProps) {
     setBusy(true);
     try {
       const outcome = await claimGroup(gameId, selected);
-      if (outcome === 'too_slow') setToast('Too slow — those cards were taken');
+      if (outcome === 'penalty') setToast('Not a XORO — you’re paused');
+      else if (outcome === 'too_slow') setToast('Too slow — those cards were taken');
       setSelected([]);
     } catch (e) {
       setToast(e instanceof Error ? e.message : 'Claim failed');
@@ -104,7 +105,10 @@ export function MultiplayerGame({ gameId, onExit }: MultiplayerGameProps) {
     }
   };
 
-  const canClaim = !paused && !busy && isValidGroup(selected);
+  // Any non-empty selection can be submitted; the server validates the math and
+  // penalizes a bad claim. The UI must NOT gate on validity — that would make
+  // the competitive penalty unreachable.
+  const canClaim = !paused && !busy && selected.length > 0;
   const selectedDots = selected.reduce((s, v) => s + popcount(v), 0);
 
   return (

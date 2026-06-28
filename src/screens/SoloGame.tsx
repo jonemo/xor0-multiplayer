@@ -1,5 +1,5 @@
 /** Solo timed game screen. */
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Table } from '../components/Table';
 import { useSoloGame } from '../hooks/useSoloGame';
 import { scoreOf } from '../lib/solo';
@@ -17,6 +17,20 @@ export function SoloGame({ difficulty, onExit }: SoloGameProps) {
   const game = useSoloGame(difficulty);
   const { state, elapsedMs, selected } = game;
   const [showValues, setShowValues] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  // Solo has no penalty: a wrong claim just gets brief feedback, no time/score
+  // cost (parallels multiplayer where the UI also never blocks a bad claim).
+  const doClaim = () => {
+    const result = game.claim();
+    if (result === 'ok') return;
+    const msg =
+      result === 'not-on-table' ? 'Those cards aren’t on the table' : 'Not a valid XORO';
+    setToast(msg);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 1800);
+  };
 
   const deckRemaining = state.deck.length - state.deckPointer;
   const dots = state.collected.reduce((sum, v) => sum + popcount(v), 0);
@@ -37,6 +51,8 @@ export function SoloGame({ difficulty, onExit }: SoloGameProps) {
         </div>
       </header>
 
+      {toast && <div className="solo__toast">{toast}</div>}
+
       <section className="solo__board">
         <Table
           table={state.table}
@@ -51,7 +67,7 @@ export function SoloGame({ difficulty, onExit }: SoloGameProps) {
         <button
           className="btn btn--primary btn--xoro"
           disabled={!game.canClaim}
-          onClick={() => game.claim()}
+          onClick={doClaim}
         >
           XORO!{' '}
           {selected.length > 0 && (

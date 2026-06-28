@@ -1,5 +1,5 @@
 /** React state wrapper around the pure solo engine (src/lib/solo.ts). */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   attemptClaim,
   createSoloGame,
@@ -20,7 +20,7 @@ export interface UseSoloGame {
   selected: CardValue[];
   toggle: (v: CardValue) => void;
   clearSelection: () => void;
-  /** True when the current selection is a claimable XORO group. */
+  /** True when a claim can be attempted (game in progress, cards selected). */
   canClaim: boolean;
   claim: () => ClaimResult;
   hint: () => void;
@@ -68,10 +68,9 @@ export function useSoloGame(initialDifficulty: Difficulty): UseSoloGame {
 
   const clearSelection = useCallback(() => setSelected([]), []);
 
-  const claimable = useMemo(() => {
-    const { result } = attemptClaim(state, selected);
-    return result === 'ok';
-  }, [state, selected]);
+  // Any non-empty selection can be submitted; claim() reports back whether it
+  // was valid so the UI can give feedback. (Solo has no penalty — see screen.)
+  const canClaim = state.status === 'playing' && selected.length > 0;
 
   const claim = useCallback((): ClaimResult => {
     const { state: next, result } = attemptClaim(state, selected);
@@ -104,7 +103,7 @@ export function useSoloGame(initialDifficulty: Difficulty): UseSoloGame {
     selected,
     toggle,
     clearSelection,
-    canClaim: claimable,
+    canClaim,
     claim,
     hint,
     hinted,
