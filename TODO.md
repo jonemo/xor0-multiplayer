@@ -33,7 +33,7 @@ verified (including a real two-human multiplayer test). What's left:
 
 ## Tech debt / infra
 
-- [ ] **CI quality gate.** The deploy workflow only builds. Add a job (or step) that
+- [x] **CI quality gate.** The deploy workflow only builds. Add a job (or step) that
       runs `npm test` + `npm run typecheck` and blocks deploy on failure.
 - [ ] **Realtime latency.** If claims feel laggy for spectators, consider Supabase
       Broadcast (lower latency) in addition to Postgres Changes. Authority stays in
