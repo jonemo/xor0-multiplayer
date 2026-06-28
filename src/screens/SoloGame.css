@@ -145,3 +145,14 @@
   justify-content: center;
   margin-top: 16px;
 }
+.overlay__buy {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--teal);
+  text-decoration: underline;
+}
+.overlay__buy:hover {
+  color: #0a6f6f;
+}

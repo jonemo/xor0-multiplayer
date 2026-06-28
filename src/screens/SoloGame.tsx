@@ -6,6 +6,7 @@ import { useTableKeyboard } from '../hooks/useTableKeyboard';
 import { scoreOf } from '../lib/solo';
 import { formatTime } from '../lib/format';
 import { getBest } from '../lib/leaderboard';
+import { BUY_URL } from '../lib/links';
 import { DIFFICULTY, popcount, type Difficulty } from '../lib/xor';
 import './SoloGame.css';
 
@@ -190,6 +191,14 @@ function GameOver({
             Change level
           </button>
         </div>
+        <a
+          className="overlay__buy"
+          href={BUY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          🛒 Buy the physical game
+        </a>
       </div>
     </div>
   );

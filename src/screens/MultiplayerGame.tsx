@@ -7,6 +7,7 @@ import { useTableKeyboard } from '../hooks/useTableKeyboard';
 import { useAuth } from '../auth/AuthProvider';
 import { claimGroup, leaveGame, restartGame, startGame } from '../lib/api';
 import { popcount, type CardValue } from '../lib/xor';
+import { BUY_URL } from '../lib/links';
 import type { GamePlayerRow } from '../lib/database.types';
 import './MultiplayerGame.css';
 
@@ -341,6 +342,14 @@ function Results({
       <button className="btn btn--ghost" onClick={onExit}>
         Back to menu
       </button>
+      <a
+        className="btn btn--ghost"
+        href={BUY_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        🛒 Buy the Game
+      </a>
     </div>
   );
 }

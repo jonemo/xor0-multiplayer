@@ -132,8 +132,16 @@
   gap: 10px;
   margin-bottom: 8px;
 }
+.home__top-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
 .home__chip {
   appearance: none;
+  display: inline-block;
+  text-decoration: none;
   background: #fff;
   border: 1px solid #e6e6e6;
   border-radius: 999px;

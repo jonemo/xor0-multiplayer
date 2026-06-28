@@ -5,6 +5,7 @@ import { AccountDialog } from '../components/AccountDialog';
 import { createGame, joinGame, quickMatch } from '../lib/api';
 import { formatTime } from '../lib/format';
 import { getBest } from '../lib/leaderboard';
+import { BUY_URL } from '../lib/links';
 import { DIFFICULTY, type Difficulty } from '../lib/xor';
 import './Home.css';
 
@@ -67,9 +68,19 @@ export function Home({ onStartSolo, onEnterGame, onShowLeaderboard }: HomeProps)
   return (
     <main className="home">
       <div className="home__top">
-        <button className="home__chip" onClick={onShowLeaderboard}>
-          🏆 Leaderboard
-        </button>
+        <div className="home__top-left">
+          <button className="home__chip" onClick={onShowLeaderboard}>
+            🏆 Leaderboard
+          </button>
+          <a
+            className="home__chip"
+            href={BUY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            🛒 Buy the Game
+          </a>
+        </div>
         {auth.configured && (
           <button className="home__chip" onClick={() => setShowAccount(true)}>
             {accountLabel}

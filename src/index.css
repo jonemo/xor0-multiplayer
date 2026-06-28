@@ -37,6 +37,10 @@ h2 {
 /* Shared buttons */
 .btn {
   appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
   font: inherit;
   font-weight: 700;
   border-radius: 10px;
