@@ -2,6 +2,7 @@
 import { useRef, useState } from 'react';
 import { Table } from '../components/Table';
 import { useSoloGame } from '../hooks/useSoloGame';
+import { useTableKeyboard } from '../hooks/useTableKeyboard';
 import { scoreOf } from '../lib/solo';
 import { formatTime } from '../lib/format';
 import { getBest } from '../lib/leaderboard';
@@ -44,6 +45,14 @@ export function SoloGame({ difficulty, onExit }: SoloGameProps) {
     toastTimer.current = setTimeout(() => setToast(null), 1800);
   };
 
+  const { hoverIndex, clearHover } = useTableKeyboard({
+    table: state.table,
+    enabled: state.status === 'playing',
+    toggle: game.toggle,
+    canClaim: game.canClaim,
+    onClaim: doClaim,
+  });
+
   const deckRemaining = state.deck.length - state.deckPointer;
   const dots = state.collected.reduce((sum, v) => sum + popcount(v), 0);
   const selectedDots = selected.reduce((sum, v) => sum + popcount(v), 0);
@@ -71,6 +80,8 @@ export function SoloGame({ difficulty, onExit }: SoloGameProps) {
           selected={selected}
           hinted={game.hinted}
           showValues={showValues}
+          hoveredIndex={hoverIndex}
+          onCardHover={clearHover}
           onToggle={state.status === 'playing' ? game.toggle : undefined}
         />
       </section>

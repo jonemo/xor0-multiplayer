@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Table } from '../components/Table';
 import { useGame } from '../hooks/useGame';
+import { useTableKeyboard } from '../hooks/useTableKeyboard';
 import { useAuth } from '../auth/AuthProvider';
 import { claimGroup, leaveGame, restartGame, startGame } from '../lib/api';
 import { popcount, type CardValue } from '../lib/xor';
@@ -20,6 +21,7 @@ export function MultiplayerGame({ gameId, onExit }: MultiplayerGameProps) {
   const [selected, setSelected] = useState<CardValue[]>([]);
   const [toast, setToast] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [showValues, setShowValues] = useState(false);
 
   const me = useMemo(
     () => players.find((p) => p.user_id === user?.id) ?? null,
@@ -54,10 +56,6 @@ export function MultiplayerGame({ gameId, onExit }: MultiplayerGameProps) {
     ? (players.find((p) => p.id === intermission.claimedPlayerId)?.display_name ?? 'Someone')
     : null;
 
-  if (loading || !game) {
-    return <main className="mp mp--center">Loading game…</main>;
-  }
-
   const toggle = (v: CardValue) =>
     setSelected((s) => (s.includes(v) ? s.filter((x) => x !== v) : [...s, v]));
 
@@ -74,6 +72,25 @@ export function MultiplayerGame({ gameId, onExit }: MultiplayerGameProps) {
       setBusy(false);
     }
   };
+
+  // Any non-empty selection can be submitted; the server validates the math and
+  // penalizes a bad claim. The UI must NOT gate on validity — that would make
+  // the competitive penalty unreachable.
+  const canClaim = !paused && !busy && selected.length > 0;
+
+  // Keyboard controls. Card keys are live only while the board is interactive
+  // (active round, no intermission, not paused); Enter mirrors the XORO! button.
+  const { hoverIndex, clearHover } = useTableKeyboard({
+    table: game?.table_cards ?? [],
+    enabled: game?.status === 'active' && !intermission && !paused,
+    toggle,
+    canClaim,
+    onClaim: doClaim,
+  });
+
+  if (loading || !game) {
+    return <main className="mp mp--center">Loading game…</main>;
+  }
 
   const doStart = async () => {
     setBusy(true);
@@ -105,10 +122,6 @@ export function MultiplayerGame({ gameId, onExit }: MultiplayerGameProps) {
     }
   };
 
-  // Any non-empty selection can be submitted; the server validates the math and
-  // penalizes a bad claim. The UI must NOT gate on validity — that would make
-  // the competitive penalty unreachable.
-  const canClaim = !paused && !busy && selected.length > 0;
   const selectedDots = selected.reduce((s, v) => s + popcount(v), 0);
 
   return (
@@ -145,6 +158,9 @@ export function MultiplayerGame({ gameId, onExit }: MultiplayerGameProps) {
                 table={intermission ? intermission.displayTable : game.table_cards}
                 selected={intermission ? [] : selected}
                 claimed={intermission?.claimedCards}
+                showValues={showValues}
+                hoveredIndex={intermission ? null : hoverIndex}
+                onCardHover={clearHover}
                 onToggle={intermission || paused ? undefined : toggle}
               />
               {paused && !intermission && (
@@ -180,6 +196,14 @@ export function MultiplayerGame({ gameId, onExit }: MultiplayerGameProps) {
           <button className="btn btn--ghost" disabled={!selected.length} onClick={() => setSelected([])}>
             Clear
           </button>
+          <label className="mp__toggle">
+            <input
+              type="checkbox"
+              checked={showValues}
+              onChange={(e) => setShowValues(e.target.checked)}
+            />
+            Show numbers
+          </label>
         </footer>
       )}
     </main>

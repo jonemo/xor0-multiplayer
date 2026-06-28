@@ -114,6 +114,14 @@
   justify-content: center;
 }
 
+.mp__toggle {
+  font-size: 13px;
+  color: #777;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
 /* Scoreboard */
 .scoreboard {
   background: #fff;

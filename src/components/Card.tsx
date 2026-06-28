@@ -21,13 +21,30 @@ export interface CardProps {
   claimed?: boolean;
   /** Visually de-emphasize (e.g. not part of a hovered group). */
   dimmed?: boolean;
+  /** Elevated via keyboard navigation (mirrors mouse :hover). */
+  hovered?: boolean;
   onClick?: (value: CardValue) => void;
-  /** Show the card's total value in a corner (helper for new players). */
+  /** Fired when the pointer enters the card (used to clear keyboard hover). */
+  onHover?: (value: CardValue) => void;
+  /** Show a badge in a corner (helper for new players / keyboard play). */
   showValue?: boolean;
+  /** Overrides what the corner badge shows (e.g. table position). */
+  displayValue?: number | string;
   className?: string;
 }
 
-export function Card({ value, selected, claimed, dimmed, onClick, showValue, className }: CardProps) {
+export function Card({
+  value,
+  selected,
+  claimed,
+  dimmed,
+  hovered,
+  onClick,
+  onHover,
+  showValue,
+  displayValue,
+  className,
+}: CardProps) {
   const interactive = !!onClick;
   const dots = dotsForCard(value);
 
@@ -39,6 +56,7 @@ export function Card({ value, selected, claimed, dimmed, onClick, showValue, cla
         selected ? 'xcard--selected' : '',
         claimed ? 'xcard--claimed' : '',
         dimmed ? 'xcard--dimmed' : '',
+        hovered ? 'xcard--hovered' : '',
         interactive ? '' : 'xcard--static',
         className ?? '',
       ]
@@ -48,6 +66,7 @@ export function Card({ value, selected, claimed, dimmed, onClick, showValue, cla
       aria-pressed={interactive ? !!selected : undefined}
       aria-label={`Card ${value}`}
       onClick={onClick ? () => onClick(value) : undefined}
+      onMouseEnter={onHover ? () => onHover(value) : undefined}
     >
       <svg viewBox={`0 0 ${VB_W} ${VB_H}`} className="xcard__svg" role="img">
         <MeshBackground />
@@ -56,7 +75,7 @@ export function Card({ value, selected, claimed, dimmed, onClick, showValue, cla
         ))}
         {showValue && (
           <text className="xcard__value" x={VB_W - 12} y={22} textAnchor="end">
-            {value}
+            {displayValue ?? value}
           </text>
         )}
       </svg>
