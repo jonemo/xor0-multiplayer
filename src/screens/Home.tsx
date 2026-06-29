@@ -7,6 +7,7 @@ import { formatTime } from '../lib/format';
 import { getBest } from '../lib/leaderboard';
 import { BUY_URL } from '../lib/links';
 import { DIFFICULTY, type Difficulty } from '../lib/xor';
+import logoUrl from '../assets/logo.svg';
 import './Home.css';
 
 const ORDER: Difficulty[] = ['easy', 'medium', 'normal', 'master'];
@@ -88,7 +89,9 @@ export function Home({ onStartSolo, onEnterGame, onShowLeaderboard }: HomeProps)
         )}
       </div>
 
-      <h1 className="home__wordmark wordmark">Xor0</h1>
+      <h1 className="home__wordmark">
+        <img src={logoUrl} alt="Xor0" className="home__logo" />
+      </h1>
       <p className="home__tagline">
         Find a set of cards whose colored dots all cancel out — every color an even number of times —
         and shout <strong>XORO!</strong> Clear cards faster than anyone else.
