@@ -157,7 +157,12 @@
   background: #fff6e8;
 }
 .scoreboard li.is-paused {
-  opacity: 0.55;
+  background: rgba(128, 0, 0, 0.08); /* #800000, the game's red, low opacity */
+  box-shadow: inset 0 0 0 1px rgba(128, 0, 0, 0.35);
+}
+.scoreboard li.is-paused .scoreboard__name {
+  color: #800000;
+  font-weight: 600;
 }
 .scoreboard__score {
   font-weight: 800;
