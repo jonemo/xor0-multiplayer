@@ -37,17 +37,15 @@
 }
 
 .mp__toast {
-  position: fixed;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
+  margin: 14px auto 0;
+  max-width: max-content;
+  text-align: center;
   background: #222;
   color: #fff;
   padding: 8px 16px;
   border-radius: 999px;
   font-size: 14px;
   font-weight: 600;
-  z-index: 30;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
 }
 
@@ -75,7 +73,7 @@
 }
 
 .mp__intermission {
-  margin: 0 auto 14px;
+  margin: 14px auto 0;
   max-width: max-content;
   text-align: center;
   background: #c99600;
@@ -91,7 +89,7 @@
 @keyframes mp-intermission-in {
   from {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;

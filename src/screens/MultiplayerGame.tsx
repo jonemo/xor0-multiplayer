@@ -137,8 +137,6 @@ export function MultiplayerGame({ gameId, onExit }: MultiplayerGameProps) {
         </div>
       </header>
 
-      {toast && <div className="mp__toast">{toast}</div>}
-
       <div className="mp__layout">
         <ScoreBoard players={players} meId={me?.id} winnerId={game.winner_id} />
 
@@ -149,12 +147,6 @@ export function MultiplayerGame({ gameId, onExit }: MultiplayerGameProps) {
 
           {game.status === 'active' && (
             <>
-              {intermission && (
-                <div className="mp__intermission">
-                  {claimerName} got {intermission.claimedCards.length} card
-                  {intermission.claimedCards.length === 1 ? '' : 's'}!
-                </div>
-              )}
               <Table
                 table={intermission ? intermission.displayTable : game.table_cards}
                 selected={intermission ? [] : selected}
@@ -164,6 +156,13 @@ export function MultiplayerGame({ gameId, onExit }: MultiplayerGameProps) {
                 onCardHover={clearHover}
                 onToggle={intermission || paused ? undefined : toggle}
               />
+              {intermission && (
+                <div className="mp__intermission">
+                  {claimerName} got {intermission.claimedCards.length} card
+                  {intermission.claimedCards.length === 1 ? '' : 's'}!
+                </div>
+              )}
+              {toast && <div className="mp__toast">{toast}</div>}
               {paused && !intermission && (
                 <div className="mp__paused">Paused — wait for the next valid XORO to rejoin.</div>
               )}
